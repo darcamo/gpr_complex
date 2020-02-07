@@ -10,6 +10,7 @@ from bokeh.models import Label
 from .kernels import Kernel, RBF
 from .gaussian_process import posterior_predictive
 from .plot import GpChart
+from typing import Tuple, Union, Optional
 
 
 class GPR:
@@ -28,16 +29,16 @@ class GPR:
         self._noise_power = noise_power
 
         # This will be set by the `fit` method, which wil also update params
-        self._x_train = None
-        self._y_train = None
-        self._likelihood = None
+        self._x_train: np.ndarray
+        self._y_train: np.ndarray
+        self._likelihood: float
 
     @property
-    def kernel(self):
+    def kernel(self) -> Kernel:
         """Return the kernel used by this GPR model."""
         return self._kernel
 
-    def fit(self, x_train, y_train):
+    def fit(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
         """
         Fit the Gaussian process model.
 
@@ -55,18 +56,20 @@ class GPR:
             x_train, y_train, self._noise_power)
 
     @property
-    def input_dim(self):
-        """True if the model was already trained with the `fit` method, False otherwise."""
+    def input_dim(self) -> int:
+        """
+        Number of dimensions features in the training sample
+        """
         if self._x_train is None:
             return 0
         return self._x_train.shape[1]
 
     @property
-    def is_trained(self):
+    def is_trained(self) -> bool:
         """Property indicating if the model is already trained or not"""
         return self._x_train is not None
 
-    def likelihood(self):
+    def likelihood(self) -> Optional[float]:
         """
         Get the likelihood of the trained kernel.
 
@@ -74,7 +77,11 @@ class GPR:
         """
         return self._likelihood
 
-    def predict(self, x_test, return_cov=False):
+    def predict(
+        self,
+        x_test: np.ndarray,
+        return_cov: bool = False
+    ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """
         Predict the target for the provided input `x_test` using the fitted
         model.
@@ -86,8 +93,9 @@ class GPR:
 
         Returns
         -------
-        np.ndarray, np.ndarray Posterior mean vector (with `n` samples) and
-            covariance matrix (dimension `n x n`).
+        np.ndarray, np.ndarray
+            Posterior mean vector (with `n` samples) and covariance matrix
+            (dimension `n x n`).
         """
         if not self.is_trained:
             raise RuntimeError(
@@ -100,7 +108,7 @@ class GPR:
             return mu, cov
         return mu
 
-    def _get_chart_real_case(self, X):
+    def _get_chart_real_case(self, X: np.ndarray) -> GpChart:
         mu, cov = self.predict(X)
         chart = GpChart(dict(mu=mu.ravel(), cov=cov, x=X.ravel()),
                         dict(x=self._x_train.ravel(), y=self._y_train.ravel()),
@@ -116,10 +124,23 @@ class GPR:
         chart.fig.add_layout(text_annotation)
         return chart
 
-    def chart(self, X, show=True):
-        """Show a chart with the GP prediction for `X`.
+    def chart(self, X: np.ndarray, show: bool = True) -> None:
+        """
+        Show a chart with the GP prediction for `X`.
 
         This is only possible when `X` has only one feature and it is real.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            The array to with the inputs to prediction the output
+        show : bool, optional
+            If the plot should be shown. Default is True.
+
+        Raises
+        ------
+        RuntimeError
+            If the model was trained with input that is not 1D or if the input is complex.
         """
         if self.input_dim != 1:
             raise RuntimeError(
@@ -133,27 +154,3 @@ class GPR:
         chart = self._get_chart_real_case(X)
         if show:
             chart.show()
-
-
-# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-if __name__ == '__main__':
-    import math
-
-    num_samples = 400
-    num_features = 4
-    noise_power = 1e-5
-    rbf = RBF(1.0, 1.0)
-
-    X1 = np.random.randn(num_samples, num_features)
-    y1 = X1 @ [1, -2, 3, -4] + \
-        math.sqrt(noise_power) * np.random.randn(num_samples)
-
-    gpr = GPR(noise_power, rbf)
-    print(gpr.kernel.get_params())
-    gpr.fit(X1, y1)
-    print(gpr.kernel.get_params())
-
-    y1_pred, y1_pred_cov = gpr.predict(X1)
-    print("y1", y1.shape)
-    print("y1_pred", y1_pred.shape)
-    print(y1 - y1_pred)

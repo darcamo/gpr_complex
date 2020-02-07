@@ -4,8 +4,14 @@ Module with several functions to work with Gaussian processes.
 
 import math
 
+from typing import Optional, Callable, List, Union, Iterable, Tuple, Sequence
 import numpy as np
 from scipy.optimize import minimize
+from scipy.optimize import OptimizeResult
+
+KernelFunc = Callable[..., np.ndarray]
+DiagLoading = Union[float, bool]
+ThetaType = List[float]
 
 # def kernel_rbf(X1, X2, l=1.0, sigma_f=1.0):
 #     """
@@ -30,7 +36,10 @@ from scipy.optimize import minimize
 #     return sigma_f**2 * np.exp(-0.5 / l**2 * sqdist)
 
 
-def kernel_rbf(X1, X2, l=1.0, sigma_f=1.0):
+def kernel_rbf(X1: np.ndarray,
+               X2: np.ndarray,
+               l: float = 1.0,
+               sigma_f: float = 1.0) -> np.ndarray:
     """
     Isotropic squared exponential kernel. Computes a covariance matrix from
     points in X1 and X2.
@@ -57,7 +66,10 @@ def kernel_rbf(X1, X2, l=1.0, sigma_f=1.0):
     return sigma_f**2 * np.exp(-0.5 / l**2 * sqdist)
 
 
-def kernel_rbf_complex(X1, X2, l=1.0, sigma_f=1.0):
+def kernel_rbf_complex(X1: np.ndarray,
+                       X2: np.ndarray,
+                       l: float = 1.0,
+                       sigma_f: float = 1.0) -> np.ndarray:
     """
     RBF implementation for complex case
 
@@ -88,7 +100,10 @@ def kernel_rbf_complex(X1, X2, l=1.0, sigma_f=1.0):
     return krr + kii + 1j * (kri - kir)
 
 
-def kernel_rbf_complex_proper(X1, X2, l=1.0, sigma_f=1.0):
+def kernel_rbf_complex_proper(X1: np.ndarray,
+                              X2: np.ndarray,
+                              l: float = 1.0,
+                              sigma_f: float = 1.0) -> np.ndarray:
     """
     RBF implementation for complex proper case
 
@@ -115,7 +130,9 @@ def kernel_rbf_complex_proper(X1, X2, l=1.0, sigma_f=1.0):
     return krr + kii
 
 
-def kernel_linear(X1, X2, bias=0.0):
+def kernel_linear(X1: np.ndarray,
+                  X2: np.ndarray,
+                  bias: float = 0.0) -> np.ndarray:
     """
     Linear Kernel
 
@@ -131,11 +148,11 @@ def kernel_linear(X1, X2, bias=0.0):
     return X1 @ X2.T.conj() + bias
 
 
-def compute_loglikelihood_naive(X_train,
-                                Y_train,
-                                noise_power,
-                                kernel=kernel_rbf,
-                                theta=None):
+def compute_loglikelihood_naive(X_train: np.ndarray,
+                                Y_train: np.ndarray,
+                                noise_power: float,
+                                kernel: KernelFunc = kernel_rbf,
+                                theta: Optional[ThetaType] = None) -> float:
     """
     Compute the loglikelihood (using a naive and less stable implementation).
 
@@ -156,6 +173,11 @@ def compute_loglikelihood_naive(X_train,
     theta : List
         Contains the kernel hyper parameters, which are passed by position to
         the kernel function after `X_train` and `Y_train`
+
+    Returns
+    -------
+    float
+        The log likelihood.
     """
     if theta is None:
         theta = []
@@ -169,11 +191,12 @@ def compute_loglikelihood_naive(X_train,
     return ll.flatten()[0]
 
 
-def compute_loglikelihood_naive_complex(X_train,
-                                        Y_train,
-                                        noise_power,
-                                        kernel=kernel_rbf_complex_proper,
-                                        theta=None):
+def compute_loglikelihood_naive_complex(
+        X_train: np.ndarray,
+        Y_train: np.ndarray,
+        noise_power: float,
+        kernel: KernelFunc = kernel_rbf_complex_proper,
+        theta: Optional[ThetaType] = None) -> float:
     """
     Compute the loglikelihood (using a naive and less stable implementation).
 
@@ -194,6 +217,11 @@ def compute_loglikelihood_naive_complex(X_train,
     theta : List
         Contains the kernel hyper parameters, which are passed by position to
         the kernel function after `X_train` and `Y_train`
+
+    Returns
+    -------
+    float
+        The log likelihood.
     """
     if theta is None:
         theta = []
@@ -208,12 +236,13 @@ def compute_loglikelihood_naive_complex(X_train,
     return ll.real.flatten()[0]
 
 
-def compute_loglikelihood(X_train,
-                          Y_train,
-                          noise_power,
-                          kernel=kernel_rbf,
-                          theta=None,
-                          diagonal_loading=None):
+def compute_loglikelihood(
+        X_train: np.ndarray,
+        Y_train: np.ndarray,
+        noise_power: float,
+        kernel: KernelFunc = kernel_rbf,
+        theta: Optional[ThetaType] = None,
+        diagonal_loading: Optional[DiagLoading] = None) -> float:
     """
     Compute the loglikelihood.
 
@@ -241,6 +270,11 @@ def compute_loglikelihood(X_train,
         when the matrix is close to being singular. If True is passed, then
         each diagonal element is sum with 10^-10. If a floating number if
         passed it is used as the loading.
+
+    Returns
+    -------
+    float
+        The log likelihood.
     """
     if theta is None:
         theta = []
@@ -261,12 +295,13 @@ def compute_loglikelihood(X_train,
     return ll.flatten()[0]
 
 
-def compute_loglikelihood_complex(X_train,
-                                  Y_train,
-                                  noise_power,
-                                  kernel=kernel_rbf,
-                                  theta=None,
-                                  diagonal_loading=None):
+def compute_loglikelihood_complex(
+        X_train: np.ndarray,
+        Y_train: np.ndarray,
+        noise_power: float,
+        kernel: KernelFunc = kernel_rbf,
+        theta: Optional[ThetaType] = None,
+        diagonal_loading: Optional[DiagLoading] = None) -> float:
     """
     Compute the loglikelihood.
 
@@ -294,6 +329,11 @@ def compute_loglikelihood_complex(X_train,
         when the matrix is close to being singular. If True is passed, then
         each diagonal element is sum with 10^-10. If a floating number if
         passed it is used as the loading.
+
+    Returns
+    -------
+    float
+        The log likelihood.
     """
     if theta is None:
         theta = []
@@ -316,9 +356,10 @@ def compute_loglikelihood_complex(X_train,
     return ll.real.flatten()[0]
 
 
-def find_optimum_log_likelihood_params_real(X_train, Y_train, noise_power,
-                                            kernel, initial_theta,
-                                            *minimizeargs):
+def find_optimum_log_likelihood_params_real(
+        X_train: np.ndarray, Y_train: np.ndarray, noise_power: float,
+        kernel: KernelFunc, initial_theta: ThetaType,
+        *minimizeargs: Iterable) -> OptimizeResult:
     """
     Find the optimum hyperparameters `theta` for the kernel.
 
@@ -347,16 +388,17 @@ def find_optimum_log_likelihood_params_real(X_train, Y_train, noise_power,
         The result of the minimization. See `scipy.optimize.minimize`.
         Particularly, the optimum values are returned by `res.x`
     """
-    def nll(theta):
+    def nll(theta: ThetaType) -> float:
         return -1 * compute_loglikelihood_naive(X_train, Y_train, noise_power,
                                                 kernel, theta)
 
     return minimize(nll, initial_theta, *minimizeargs)
 
 
-def find_optimum_log_likelihood_params_complex(X_train, Y_train, noise_power,
-                                               kernel, initial_theta,
-                                               *minimizeargs):
+def find_optimum_log_likelihood_params_complex(
+        X_train: np.ndarray, Y_train: np.ndarray, noise_power: float,
+        kernel: KernelFunc, initial_theta: ThetaType,
+        *minimizeargs: Iterable) -> OptimizeResult:
     """
     Find the optimum hyperparameters `theta` for the kernel.
 
@@ -385,7 +427,7 @@ def find_optimum_log_likelihood_params_complex(X_train, Y_train, noise_power,
         The result of the minimization. See `scipy.optimize.minimize`.
         Particularly, the optimum values are returned by `res.x`
     """
-    def nll(theta):
+    def nll(theta: ThetaType) -> float:
         return -1 * compute_loglikelihood_complex(X_train, Y_train,
                                                   noise_power, kernel, theta)
 
@@ -430,12 +472,13 @@ def find_optimum_log_likelihood_params_complex(X_train, Y_train, noise_power,
 
 
 # Prediction Function
-def posterior_predictive(X_s,
-                         X_train,
-                         Y_train,
-                         noise_power=1e-8,
-                         kernel=kernel_rbf,
-                         theta=None):
+def posterior_predictive(
+        X_s: np.ndarray,
+        X_train: np.ndarray,
+        Y_train: np.ndarray,
+        noise_power: float = 1e-8,
+        kernel: KernelFunc = kernel_rbf,
+        theta: Optional[ThetaType] = None) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Computes the suffifient statistics of the GP posterior predictive distribution from `m` training data
     `X_train` and `Y_train` and `n` new inputs `X_s`.

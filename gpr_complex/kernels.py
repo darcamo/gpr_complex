@@ -1,31 +1,39 @@
-
 # pylint: disable=relative-beyond-top-level
-
 """Implement some kernels for use with Gaussian Process."""
 
 from copy import copy
 import numpy as np
 from scipy.optimize import minimize
+from typing import Sequence, Any, List
 
-from .gaussian_process import kernel_rbf, kernel_rbf_complex, kernel_rbf_complex_proper, compute_loglikelihood, compute_loglikelihood_complex
+from .gaussian_process import kernel_rbf, kernel_rbf_complex, kernel_rbf_complex_proper, compute_loglikelihood_complex
+from .gaussian_process import compute_loglikelihood as comp_loglikelihood
 
 
 class Kernel:
     """Base class for Kernels."""
-
-    def __init__(self, params, work_with_complex: float = False):
+    def __init__(self,
+                 params: Sequence[float],
+                 work_with_complex: bool = False):
         # This will NOT be changed by optimize method
         self._initial_params = copy(params)
         # This WILL be changed by optimize method
         self._params = copy(params)
         self._work_with_complex_numbers = work_with_complex
 
-    def compute_loglikelihood(self, x_train, y_train, noise_power):
+    def compute_loglikelihood(self, x_train: np.ndarray, y_train: np.ndarray,
+                              noise_power: float) -> float:
         """Compute the likelihood of the kernel current parameters"""
-        f = compute_loglikelihood_complex if self._work_with_complex_numbers else compute_loglikelihood
-        return f(x_train, y_train, noise_power, kernel=self.compute, theta=self._params)
+        f = compute_loglikelihood_complex if self._work_with_complex_numbers else comp_loglikelihood
+        return f(
+            x_train,
+            y_train,
+            noise_power,
+            kernel=self.compute,
+            theta=self._params  # type: ignore
+        )
 
-    def get_initial_params(self):
+    def get_initial_params(self) -> Sequence[float]:
         """
         Get the kernel initial parameters.
 
@@ -33,40 +41,46 @@ class Kernel:
         """
         return self._initial_params
 
-    def get_params(self):
+    def get_params(self) -> Sequence[float]:
         """Get the kernel parameters"""
         return self._params
 
     @property
-    def work_with_complex_numbers(self):
+    def work_with_complex_numbers(self) -> bool:
         """True if this kernel can be used with complex numbers (inputs and target)"""
         return self._work_with_complex_numbers
 
     @staticmethod
-    def compute(X1, X2, *params):
+    def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
         """Compute the similarity between `X1``and `X2` according with the kernel."""
         raise NotImplementedError("Implement-me")
 
-    def __call__(self, X1, X2):
+    def __call__(self, X1: np.ndarray, X2: np.ndarray) -> np.ndarray:
         return self.compute(X1, X2, *self._params)
 
-    def optimize(self, x_train, y_train, noise_power: float):
+    def optimize(self, x_train: np.ndarray, y_train: np.ndarray,
+                 noise_power: float) -> None:
         """Optimize the kernel parameters"""
-        f = compute_loglikelihood_complex if self._work_with_complex_numbers else compute_loglikelihood
+        f = compute_loglikelihood_complex if self._work_with_complex_numbers else comp_loglikelihood
 
-        def function_to_optimize(theta):
+        def function_to_optimize(theta: List[float]) -> float:
             num_samples = x_train.shape[0]
-            return -f(x_train, y_train, noise_power, kernel=self.compute, theta=theta) / num_samples
+            return -f(x_train,
+                      y_train,
+                      noise_power,
+                      kernel=self.compute,
+                      theta=theta) / num_samples
 
         # See https://stackoverflow.com/questions/19244527/scipy-optimize-how-to-restrict-argument-values
         # for option to set bounds for the optimized parameters
         res = minimize(function_to_optimize,
-                       self._initial_params, method="Nelder-Mead")
+                       self._initial_params,
+                       method="Nelder-Mead")
         self._params = res.x
 
-    def clone(self):
+    def clone(self) -> "Kernel":
         """Create a new kernel with the same parameters of this one"""
-        return self.__class__(*self._initial_params)
+        return self.__class__(*self._initial_params)  # type: ignore
 
 
 class RBF(Kernel):
@@ -80,13 +94,11 @@ class RBF(Kernel):
     sigma_f : float
         The constant value multiplying the complex exponential.
     """
-
     def __init__(self, l: float, sigma_f: float):
-        super().__init__(params=[
-            l, sigma_f], work_with_complex=False)
+        super().__init__(params=[l, sigma_f], work_with_complex=False)
 
     @staticmethod
-    def compute(X1, X2, *params):
+    def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
         """Compute the similarity between `X1``and `X2` according with the kernel."""
         return kernel_rbf(X1, X2, *params)
 
@@ -95,13 +107,11 @@ class RBF_Complex(Kernel):
     """
     Isotropic squared exponential kernel for complex case.
     """
-
     def __init__(self, l: float, sigma_f: float):
-        super().__init__(params=[
-            l, sigma_f], work_with_complex=True)
+        super().__init__(params=[l, sigma_f], work_with_complex=True)
 
     @staticmethod
-    def compute(X1, X2, *params):
+    def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
         """Compute the similarity between `X1``and `X2` according with the kernel."""
         return kernel_rbf_complex(X1, X2, *params)
 
@@ -110,13 +120,11 @@ class RBF_ComplexProper(Kernel):
     """
     Isotropic squared exponential kernel for complex proper case.
     """
-
     def __init__(self, l: float, sigma_f: float):
-        super().__init__(params=[
-            l, sigma_f], work_with_complex=True)
+        super().__init__(params=[l, sigma_f], work_with_complex=True)
 
     @staticmethod
-    def compute(X1, X2, *params):
+    def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
         """Compute the similarity between `X1``and `X2` according with the kernel."""
         return kernel_rbf_complex_proper(X1, X2, *params)
 

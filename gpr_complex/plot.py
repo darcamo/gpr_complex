@@ -1,14 +1,14 @@
 """Module with plot related code"""
 
-# np.set_printoptions(linewidth=120, precision=4)
-# import matplotlib.pyplot as plt
-import numpy as np
+from typing import List, Optional, Any
 
-# from bokeh.core.properties import value
-# from bokeh.layouts import gridplot, row
-from bokeh.models import Band, ColumnDataSource, tools
+# np.set_printoptions(linewidth=120, precision=4)
+import numpy as np
+from bokeh.models import Band, ColumnDataSource, GlyphRenderer, tools
 from bokeh.palettes import Category10_4 as palette  # pylint: disable=no-name-in-module
 from bokeh.plotting import figure, show
+
+from bokeh.plotting.figure import Figure
 
 
 class GpChart:
@@ -23,31 +23,39 @@ class GpChart:
 
     Parameters
     ----------
-    source : ColumnDataSource, dict Either a bokeh ColumnDataSource of a
-        dictionary containing at least the fields 'x', 'mu' and 'cov', where 'x'
-        is a range of values, 'mu' is the predicted average function response
-        for the range of values in 'x', and `cov` is covariance matrix.
-        train_data_source : ColumnDataSource, None Optional ColumnDataSource
-        containing a 'x' and 'y' columns with training data num_samples : int
+    source : ColumnDataSource, dict
+        Either a bokeh ColumnDataSource of a dictionary containing at least the
+        fields 'x', 'mu' and 'cov', where 'x' is a range of values, 'mu' is the
+        predicted average function response for the range of values in 'x', and
+        `cov` is covariance matrix.
+    train_data_source : ColumnDataSource, None
+        Optional ColumnDataSource containing a 'x' and 'y' columns with
+        training data
+    num_samples : int
         Number of samples (curves) of the multivariate Gaussian distribution
         with `mu` and `cov` that should be added to the plot. A maximum of four
-        samples is possible. Default is zero plot_marker : bool If predicted
-        points should be marked with a circle or not. xlabel : str Label of the
-        'x' axis. Default is "x" ylabel : str Label of the 'y' axis. Default is
-        "y" kargs : dict The remaining arguments captured in `kargs` are passed
-        to bokeh figure. Ex: width, height, title, etc.
+        samples is possible. Default is zero
+    plot_marker : bool
+        If predicted points should be marked with a circle or not.
+    xlabel : str
+        Label of the 'x' axis. Default is "x"
+    ylabel : str
+        Label of the 'y' axis. Default is "y"
+    kargs : dict
+        The remaining arguments captured in `kargs` are passed to bokeh figure.
+        Ex: width, height, title, etc.
     """
     def __init__(self,
-                 source,
-                 train_data_source=None,
-                 num_samples=0,
-                 plot_marker=False,
-                 xlabel='x',
-                 ylabel='y',
+                 source: ColumnDataSource,
+                 train_data_source: Optional[ColumnDataSource] = None,
+                 num_samples: int = 0,
+                 plot_marker: bool = False,
+                 xlabel: str = 'x',
+                 ylabel: str = 'y',
                  **kargs):
         # Number of samples currently added to the plot
-        self._num_samples = 0
-        self._sample_renderers = []
+        self._num_samples: int = 0
+        self._sample_renderers: List[GlyphRenderer] = []
 
         if isinstance(source, dict):
             source = ColumnDataSource(data=source)
@@ -125,47 +133,49 @@ class GpChart:
         fig.add_layout(band)
         fig.legend.click_policy = "hide"
 
-        self._source = source
-        self._fig = fig
+        self._source: ColumnDataSource = source
+        self._fig: Figure = fig
 
         if num_samples > 0:
             self.add_samples(num_samples)
 
-    def show(self, notebook_handle=False):
+    def show(self, notebook_handle: bool = False) -> Optional[Any]:
         """
         Show the chart
 
         Parameters
         ----------
         notebook_handle : bool
-            Passed to bokeh `show` function. Set to True to return a notebook handler and allow updating the plot using a ipywidgets, for instance.
+            Passed to bokeh `show` function. Set to True to return a notebook
+            handler and allow updating the plot using a ipywidgets, for
+            instance.
         """
         return show(self._fig, notebook_handle=notebook_handle)
 
     @property
-    def fig(self):
+    def fig(self) -> Figure:
         """Figure property"""
         return self._fig
 
     @property
-    def xlabel(self):
+    def xlabel(self) -> str:
         """Property to read/set the `x` axis label"""
         return self._fig.xaxis.axis_label
 
     @xlabel.setter
-    def xlabel(self, new_value):
+    def xlabel(self, new_value: str) -> None:
         self._fig.xaxis.axis_label = new_value
 
     @property
-    def ylabel(self):
+    def ylabel(self) -> str:
         """Property to read/set the `y` axis label"""
         return self._fig.yaxis.axis_label
 
     @ylabel.setter
-    def ylabel(self, new_value):
+    def ylabel(self, new_value: str) -> None:
         self._fig.yaxis.axis_label = new_value
 
-    def update(self, mu, cov):
+    def update(self, mu: np.ndarray, cov: np.ndarray) -> None:
         """
         Update the plot
 
@@ -184,9 +194,14 @@ class GpChart:
         self._source.data["upper"] = mu + uncertainty
         self._source.data["var"] = cov_diag
 
-    def add_samples(self, num_samples):
+    def add_samples(self, num_samples: int) -> None:
         """
         Sample the GP and add a sample to the plot
+
+        Parameters
+        ----------
+        num_samples : int
+            Number of samples to add
         """
         self._num_samples = num_samples
 
@@ -202,7 +217,7 @@ class GpChart:
                 self._fig.line(x, sample, color=palette[i],
                                line_dash="dashed"))
 
-    def remove_samples(self):
+    def remove_samples(self) -> None:
         """
         Remove the samples from the plot
         """
@@ -216,14 +231,14 @@ class GpChart:
 # to plot the prediction have different sizes, we need to create separated
 # column data sources. For the same reason, we have to create two hover tools,
 # one for the prediction data and one for the training data.
-def plot_gp(source,
-            train_data_source=None,
-            samples=None,
-            plot_marker=False,
-            xlabel='x',
-            ylabel='y',
-            dont_show=False,
-            **kargs):
+def plot_gp(source: ColumnDataSource,
+            train_data_source: Optional[ColumnDataSource] = None,
+            samples: Optional[np.ndarray] = None,
+            plot_marker: bool = False,
+            xlabel: str = 'x',
+            ylabel: str = 'y',
+            dont_show: bool = False,
+            **kargs) -> Optional[Figure]:
     """
     Plot a Gaussian Process.
 
@@ -242,17 +257,30 @@ def plot_gp(source,
         ploted by the 'x' values in `source`. If an int is passed, then a
         multivariate Gaussian distribution is generated using `mu` and `cov` in
         `source`. A maximum of four samples is possible.
+    plot_marker : bool
+        If predicted points should be marked with a circle or not.
+    xlabel : str
+        Label of the 'x' axis. Default is "x"
+    ylabel : str
+        Label of the 'y' axis. Default is "y"
+    dont_show : bool
+        If the plot should not be show and the figure should be returned instead. Default is False.
     kargs : dict
         The remaining arguments captured in `kargs` are passed to bokeh figure.
         Ex: width, height, title, etc.
+
+    Returns
+    -------
+    figure or None
+        Returns the bokeh figure if `dont_show` is True.
     """
     if isinstance(source, dict):
         source = ColumnDataSource(data=source)
 
-    x = source.data["x"]
-    mu = source.data["mu"]
-    cov_diag = np.diag(source.data["cov"])
-    uncertainty = 1.96 * np.sqrt(cov_diag)
+    x: np.ndarray = source.data["x"]
+    mu: np.ndarray = source.data["mu"]
+    cov_diag: np.ndarray = np.diag(source.data["cov"])
+    uncertainty: np.ndarray = 1.96 * np.sqrt(cov_diag)
 
     assert (len(mu.shape) == 1)
 
@@ -335,34 +363,3 @@ def plot_gp(source,
     if dont_show:
         return p
     show(p)
-
-
-if __name__ == '__main__':
-    from bokeh.plotting import output_file
-    from sklearn.gaussian_process import GaussianProcessRegressor
-    from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel
-
-    output_file("lalala.html")
-
-    def compute(x):  # pylint: disable=missing-function-docstring
-        return 2.5 * x + 0.5 * np.random.randn(*(x.shape))
-
-    x = np.random.randn(200, 1)
-    y = compute(x)
-
-    kernel = ConstantKernel() * RBF() + WhiteKernel()
-    gp = GaussianProcessRegressor(kernel=kernel)
-    gp.fit(x, y)
-
-    x_test = np.linspace(-1.5, 1.5, 30)[:, np.newaxis]
-    y_test = compute(x_test)
-
-    y_pred, cov_pred = gp.predict(x_test, return_cov=True)
-
-    x_test = x_test.flatten()
-    y_pred = y_pred.flatten()
-    indexes = np.argsort(x_test)
-
-    plot_gp(dict(x=x_test[indexes], mu=y_pred[indexes], cov=cov_pred),
-            dict(x=x.ravel(), y=y.ravel()),
-            samples=3)
