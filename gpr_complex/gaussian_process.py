@@ -4,14 +4,14 @@ Module with several functions to work with Gaussian processes.
 
 import math
 
-from typing import Optional, Callable, List, Union, Iterable, Tuple, Sequence
+from typing import Optional, Callable, List, Union, Iterable, Tuple, Sequence, cast
 import numpy as np
 from scipy.optimize import minimize
 from scipy.optimize import OptimizeResult
 
 KernelFunc = Callable[..., np.ndarray]
 DiagLoading = Union[float, bool]
-ThetaType = List[float]
+ParamsType = List[float]  # Type for kernel parameters
 
 # def kernel_rbf(X1, X2, l=1.0, sigma_f=1.0):
 #     """
@@ -152,7 +152,7 @@ def compute_loglikelihood_naive(X_train: np.ndarray,
                                 Y_train: np.ndarray,
                                 noise_power: float,
                                 kernel: KernelFunc = kernel_rbf,
-                                theta: Optional[ThetaType] = None) -> float:
+                                theta: Optional[ParamsType] = None) -> float:
     """
     Compute the loglikelihood (using a naive and less stable implementation).
 
@@ -188,7 +188,7 @@ def compute_loglikelihood_naive(X_train: np.ndarray,
         -0.5 * Y_train.T @ np.linalg.inv(K) @ Y_train + \
         -0.5 * m * math.log(2*np.pi)
     assert ll.size == 1
-    return ll.flatten()[0]
+    return cast(float, ll.flatten()[0])
 
 
 def compute_loglikelihood_naive_complex(
@@ -196,7 +196,7 @@ def compute_loglikelihood_naive_complex(
         Y_train: np.ndarray,
         noise_power: float,
         kernel: KernelFunc = kernel_rbf_complex_proper,
-        theta: Optional[ThetaType] = None) -> float:
+        theta: Optional[ParamsType] = None) -> float:
     """
     Compute the loglikelihood (using a naive and less stable implementation).
 
@@ -233,7 +233,7 @@ def compute_loglikelihood_naive_complex(
         -0.5 * Y_train.T.conj() @ np.linalg.inv(K) @ Y_train + \
         -0.5 * m * math.log(2*np.pi)
     assert ll.size == 1
-    return ll.real.flatten()[0]
+    return cast(float, ll.real.flatten()[0])
 
 
 def compute_loglikelihood(
@@ -241,7 +241,7 @@ def compute_loglikelihood(
         Y_train: np.ndarray,
         noise_power: float,
         kernel: KernelFunc = kernel_rbf,
-        theta: Optional[ThetaType] = None,
+        theta: Optional[ParamsType] = None,
         diagonal_loading: Optional[DiagLoading] = None) -> float:
     """
     Compute the loglikelihood.
@@ -292,7 +292,7 @@ def compute_loglikelihood(
         -0.5 * Y_train.T @ (np.linalg.lstsq(L.T, np.linalg.lstsq(L, Y_train, rcond=None)[0], rcond=None)[0]) + \
         -0.5 * m * np.log(2*np.pi)
     assert ll.size == 1
-    return ll.flatten()[0]
+    return cast(float, ll.flatten()[0])
 
 
 def compute_loglikelihood_complex(
@@ -300,7 +300,7 @@ def compute_loglikelihood_complex(
         Y_train: np.ndarray,
         noise_power: float,
         kernel: KernelFunc = kernel_rbf,
-        theta: Optional[ThetaType] = None,
+        theta: Optional[ParamsType] = None,
         diagonal_loading: Optional[DiagLoading] = None) -> float:
     """
     Compute the loglikelihood.
@@ -353,13 +353,13 @@ def compute_loglikelihood_complex(
         -0.5 * Y_train.T.conj() @ (np.linalg.lstsq(L.T, np.linalg.lstsq(L, Y_train, rcond=None)[0], rcond=None)[0]) + \
         -0.5 * m * np.log(2*np.pi)
     assert ll.size == 1
-    return ll.real.flatten()[0]
+    return cast(float, ll.real.flatten()[0])
 
 
 def find_optimum_log_likelihood_params_real(
         X_train: np.ndarray, Y_train: np.ndarray, noise_power: float,
-        kernel: KernelFunc, initial_theta: ThetaType,
-        *minimizeargs: Iterable) -> OptimizeResult:
+        kernel: KernelFunc, initial_theta: ParamsType,
+        *minimizeargs: Iterable[float]) -> OptimizeResult:
     """
     Find the optimum hyperparameters `theta` for the kernel.
 
@@ -388,7 +388,7 @@ def find_optimum_log_likelihood_params_real(
         The result of the minimization. See `scipy.optimize.minimize`.
         Particularly, the optimum values are returned by `res.x`
     """
-    def nll(theta: ThetaType) -> float:
+    def nll(theta: ParamsType) -> float:
         return -1 * compute_loglikelihood_naive(X_train, Y_train, noise_power,
                                                 kernel, theta)
 
@@ -397,8 +397,8 @@ def find_optimum_log_likelihood_params_real(
 
 def find_optimum_log_likelihood_params_complex(
         X_train: np.ndarray, Y_train: np.ndarray, noise_power: float,
-        kernel: KernelFunc, initial_theta: ThetaType,
-        *minimizeargs: Iterable) -> OptimizeResult:
+        kernel: KernelFunc, initial_theta: ParamsType,
+        *minimizeargs: Iterable[float]) -> OptimizeResult:
     """
     Find the optimum hyperparameters `theta` for the kernel.
 
@@ -427,7 +427,7 @@ def find_optimum_log_likelihood_params_complex(
         The result of the minimization. See `scipy.optimize.minimize`.
         Particularly, the optimum values are returned by `res.x`
     """
-    def nll(theta: ThetaType) -> float:
+    def nll(theta: ParamsType) -> float:
         return -1 * compute_loglikelihood_complex(X_train, Y_train,
                                                   noise_power, kernel, theta)
 
@@ -478,7 +478,7 @@ def posterior_predictive(
         Y_train: np.ndarray,
         noise_power: float = 1e-8,
         kernel: KernelFunc = kernel_rbf,
-        theta: Optional[ThetaType] = None) -> Tuple[np.ndarray, np.ndarray]:
+        theta: Optional[ParamsType] = None) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Computes the suffifient statistics of the GP posterior predictive distribution from `m` training data
     `X_train` and `Y_train` and `n` new inputs `X_s`.

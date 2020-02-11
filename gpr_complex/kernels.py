@@ -4,17 +4,15 @@
 from copy import copy
 import numpy as np
 from scipy.optimize import minimize
-from typing import Sequence, Any, List
+from typing import Sequence, Any, List, cast
 
-from .gaussian_process import kernel_rbf, kernel_rbf_complex, kernel_rbf_complex_proper, compute_loglikelihood_complex
+from .gaussian_process import kernel_rbf, kernel_rbf_complex, kernel_rbf_complex_proper, compute_loglikelihood_complex, ParamsType
 from .gaussian_process import compute_loglikelihood as comp_loglikelihood
 
 
 class Kernel:
     """Base class for Kernels."""
-    def __init__(self,
-                 params: Sequence[float],
-                 work_with_complex: bool = False):
+    def __init__(self, params: ParamsType, work_with_complex: bool = False):
         # This will NOT be changed by optimize method
         self._initial_params = copy(params)
         # This WILL be changed by optimize method
@@ -25,13 +23,11 @@ class Kernel:
                               noise_power: float) -> float:
         """Compute the likelihood of the kernel current parameters"""
         f = compute_loglikelihood_complex if self._work_with_complex_numbers else comp_loglikelihood
-        return f(
-            x_train,
-            y_train,
-            noise_power,
-            kernel=self.compute,
-            theta=self._params  # type: ignore
-        )
+        return f(x_train,
+                 y_train,
+                 noise_power,
+                 kernel=self.compute,
+                 theta=self._params)
 
     def get_initial_params(self) -> Sequence[float]:
         """
@@ -41,7 +37,7 @@ class Kernel:
         """
         return self._initial_params
 
-    def get_params(self) -> Sequence[float]:
+    def get_params(self) -> List[float]:
         """Get the kernel parameters"""
         return self._params
 
@@ -65,11 +61,12 @@ class Kernel:
 
         def function_to_optimize(theta: List[float]) -> float:
             num_samples = x_train.shape[0]
-            return -f(x_train,
-                      y_train,
-                      noise_power,
-                      kernel=self.compute,
-                      theta=theta) / num_samples
+            return cast(
+                float, -f(x_train,
+                          y_train,
+                          noise_power,
+                          kernel=self.compute,
+                          theta=theta) / num_samples)
 
         # See https://stackoverflow.com/questions/19244527/scipy-optimize-how-to-restrict-argument-values
         # for option to set bounds for the optimized parameters

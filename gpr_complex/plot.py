@@ -1,6 +1,6 @@
 """Module with plot related code"""
 
-from typing import List, Optional, Any
+from typing import List, Optional, Any, cast
 
 # np.set_printoptions(linewidth=120, precision=4)
 import numpy as np
@@ -52,7 +52,7 @@ class GpChart:
                  plot_marker: bool = False,
                  xlabel: str = 'x',
                  ylabel: str = 'y',
-                 **kargs):
+                 **kargs: Any):
         # Number of samples currently added to the plot
         self._num_samples: int = 0
         self._sample_renderers: List[GlyphRenderer] = []
@@ -160,7 +160,7 @@ class GpChart:
     @property
     def xlabel(self) -> str:
         """Property to read/set the `x` axis label"""
-        return self._fig.xaxis.axis_label
+        return cast(str, self._fig.xaxis.axis_label)
 
     @xlabel.setter
     def xlabel(self, new_value: str) -> None:
@@ -169,7 +169,7 @@ class GpChart:
     @property
     def ylabel(self) -> str:
         """Property to read/set the `y` axis label"""
-        return self._fig.yaxis.axis_label
+        return cast(str, self._fig.yaxis.axis_label)
 
     @ylabel.setter
     def ylabel(self, new_value: str) -> None:
@@ -238,7 +238,7 @@ def plot_gp(source: ColumnDataSource,
             xlabel: str = 'x',
             ylabel: str = 'y',
             dont_show: bool = False,
-            **kargs) -> Optional[Figure]:
+            **kargs: Any) -> Optional[Figure]:
     """
     Plot a Gaussian Process.
 
@@ -362,4 +362,6 @@ def plot_gp(source: ColumnDataSource,
 
     if dont_show:
         return p
+
     show(p)
+    return None

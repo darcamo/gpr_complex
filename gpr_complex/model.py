@@ -10,7 +10,7 @@ from bokeh.models import Label
 from .kernels import Kernel, RBF
 from .gaussian_process import posterior_predictive
 from .plot import GpChart
-from typing import Tuple, Union, Optional
+from typing import Tuple, Union, Optional, cast
 
 
 class GPR:
@@ -62,7 +62,7 @@ class GPR:
         """
         if self._x_train is None:
             return 0
-        return self._x_train.shape[1]
+        return cast(int, self._x_train.shape[1])
 
     @property
     def is_trained(self) -> bool:

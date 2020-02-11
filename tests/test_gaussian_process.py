@@ -7,7 +7,7 @@ from gpr_complex.gaussian_process import kernel_rbf_complex_proper, kernel_rbf, 
 
 
 class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
-    def setUp(self):
+    def setUp(self) -> None:
         m = 5  # Number of points
         d = 2  # Number of features
         self.m = m
@@ -15,7 +15,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
         self.X1 = np.random.randn(m, d)
         self.X2 = np.random.randn(m, d)
 
-    def test_kernel_rbf(self):  # pylint: disable=missing-function-docstring
+    def test_kernel_rbf(self) -> None:  # pylint: disable=missing-function-docstring
         m, X1, X2 = self.m, self.X1, self.X2
 
         # Hyper parameters
@@ -32,7 +32,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
 
         np.testing.assert_array_almost_equal(cov, expected_cov)
 
-    def test_kernel_rbf_complex(self):  # pylint: disable=missing-function-docstring
+    def test_kernel_rbf_complex(self) -> None:  # pylint: disable=missing-function-docstring
         m, d = self.m, self.d
         X1 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
         X2 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
@@ -66,7 +66,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
             expected_cov[i, j] = krr + kii + 1j * (kri - kir)
         np.testing.assert_array_almost_equal(cov, expected_cov)
 
-    def test_kernel_rbf_complex_proper(self):  # pylint: disable=missing-function-docstring
+    def test_kernel_rbf_complex_proper(self) -> None:  # pylint: disable=missing-function-docstring
         m, d = self.m, self.d
         X1 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
         X2 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
@@ -93,7 +93,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
             expected_cov[i, j] = krr + kii
         np.testing.assert_array_almost_equal(cov, expected_cov)
 
-    def test_kernel_linear(self):  # pylint: disable=missing-function-docstring
+    def test_kernel_linear(self) -> None:  # pylint: disable=missing-function-docstring
         m, X1, X2 = self.m, self.X1, self.X2
 
         # hyper parameter
@@ -108,7 +108,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
 
         np.testing.assert_array_almost_equal(cov, expected_cov)
 
-    def test_kernel_linear_complex(self):  # pylint: disable=missing-function-docstring
+    def test_kernel_linear_complex(self) -> None:  # pylint: disable=missing-function-docstring
         m, d = self.m, self.d
         X1 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
         X2 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
@@ -125,7 +125,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
 
         np.testing.assert_array_almost_equal(cov, expected_cov)
 
-    def test_compute_loglikelihood_naive(self):  # pylint: disable=missing-function-docstring
+    def test_compute_loglikelihood_naive(self) -> None:  # pylint: disable=missing-function-docstring
         m = self.m
         X1 = self.X1
         y1 = X1 @ [1, -2]
@@ -142,7 +142,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
             +0.5 * m * math.log(2*np.pi)
         self.assertAlmostEqual(nll, expected_nll)
 
-    def test_compute_loglikelihood(self):  # pylint: disable=missing-function-docstring
+    def test_compute_loglikelihood(self) -> None:  # pylint: disable=missing-function-docstring
         m = self.m
         X1 = self.X1
         y1 = X1 @ [1, -2]
@@ -159,7 +159,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
             +0.5 * m * math.log(2*np.pi)
         self.assertAlmostEqual(nll, expected_nll)
 
-    def test_compute_loglikelihood_naive_complex(self):  # pylint: disable=missing-function-docstring
+    def test_compute_loglikelihood_naive_complex(self) -> None:  # pylint: disable=missing-function-docstring
         m, d = self.m, self.d
         X1 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
         y1 = X1 @ [1, -2]
@@ -180,7 +180,7 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
                               +0.5 * m * math.log(2 * np.pi))
         self.assertAlmostEqual(nll, expected_nll)
 
-    def test_compute_loglikelihood_complex(self):  # pylint: disable=missing-function-docstring
+    def test_compute_loglikelihood_complex(self) -> None:  # pylint: disable=missing-function-docstring
         m, d = self.m, self.d
         X1 = np.random.randn(m, d) + 1j * np.random.randn(m, d)
         y1 = X1 @ [1, -2]
