@@ -5,12 +5,14 @@ Models for Gaussian Process.
 Currently there is only GPR, for Gaussian Process Regression.
 """
 
+from typing import Optional, Tuple, Union, cast
+
 import numpy as np
 from bokeh.models import Label
-from .kernels import Kernel
+
 from .gaussian_process import posterior_predictive
+from .kernels import Kernel
 from .plot import GpChart
-from typing import Tuple, Union, Optional, cast
 
 
 class GPR:
@@ -77,8 +79,11 @@ class GPR:
         """
         return self._likelihood
 
-    def predict(self, x_test: np.ndarray, return_cov: bool = False
-                ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    def predict(
+        self,
+        x_test: np.ndarray,
+        return_cov: bool = False
+    ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """
         Predict the target for the provided input `x_test` using the fitted
         model.

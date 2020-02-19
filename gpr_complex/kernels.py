@@ -2,12 +2,15 @@
 """Implement some kernels for use with Gaussian Process."""
 
 from copy import copy
+from typing import List, Sequence, cast
+
 import numpy as np
 from scipy.optimize import minimize
-from typing import Sequence, List, cast
 
-from .gaussian_process import kernel_rbf, kernel_rbf_complex, kernel_rbf_complex_proper, compute_loglikelihood_complex, ParamsType
+from .gaussian_process import ParamsType
 from .gaussian_process import compute_loglikelihood as comp_loglikelihood
+from .gaussian_process import (compute_loglikelihood_complex, kernel_rbf,
+                               kernel_rbf_complex, kernel_rbf_complex_proper)
 
 
 class Kernel:

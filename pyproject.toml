@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "gpr_complex"
+version = "0.1.0"
+description = "A GPR library that can work with complex numbers"
+authors = ["Darlan Cavalcante Moreira <darcamo@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+numpy = "^1.18.1"
+scipy = "^1.4.1"
+bokeh = "^1.4.0"
+
+[tool.poetry.dev-dependencies]
+yapf = "^0.29.0"
+mypy = "^0.761"
+pre-commit = "^2.1.0"
+isort = "^4.3.21"
+pylint = "^2.4.4"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

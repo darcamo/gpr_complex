@@ -1,3 +1,4 @@
+# pylint: disable=R0914
 """Module with plot related code"""
 
 from typing import List, Optional, Any, cast
