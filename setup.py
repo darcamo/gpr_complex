@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gpr_complex",  # Replace with your own username
-    version="0.0.1.post2",
+    version="0.1",
     author="Darlan Cavalcante Moreira",
     author_email="darcamo@gmail.com",
     description="A GPR library that can work with complex numbers",
