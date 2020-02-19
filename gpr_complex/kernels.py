@@ -4,7 +4,7 @@
 from copy import copy
 import numpy as np
 from scipy.optimize import minimize
-from typing import Sequence, Any, List, cast
+from typing import Sequence, List, cast
 
 from .gaussian_process import kernel_rbf, kernel_rbf_complex, kernel_rbf_complex_proper, compute_loglikelihood_complex, ParamsType
 from .gaussian_process import compute_loglikelihood as comp_loglikelihood

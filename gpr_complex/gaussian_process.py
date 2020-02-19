@@ -4,7 +4,7 @@ Module with several functions to work with Gaussian processes.
 
 import math
 
-from typing import Optional, Callable, List, Union, Iterable, Tuple, Sequence, cast
+from typing import Optional, Callable, List, Union, Iterable, Tuple, cast
 import numpy as np
 from scipy.optimize import minimize
 from scipy.optimize import OptimizeResult
@@ -130,8 +130,7 @@ def kernel_rbf_complex_proper(X1: np.ndarray,
     return krr + kii
 
 
-def kernel_linear(X1: np.ndarray,
-                  X2: np.ndarray,
+def kernel_linear(X1: np.ndarray, X2: np.ndarray,
                   bias: float = 0.0) -> np.ndarray:
     """
     Linear Kernel
@@ -236,13 +235,13 @@ def compute_loglikelihood_naive_complex(
     return cast(float, ll.real.flatten()[0])
 
 
-def compute_loglikelihood(
-        X_train: np.ndarray,
-        Y_train: np.ndarray,
-        noise_power: float,
-        kernel: KernelFunc = kernel_rbf,
-        theta: Optional[ParamsType] = None,
-        diagonal_loading: Optional[DiagLoading] = None) -> float:
+def compute_loglikelihood(X_train: np.ndarray,
+                          Y_train: np.ndarray,
+                          noise_power: float,
+                          kernel: KernelFunc = kernel_rbf,
+                          theta: Optional[ParamsType] = None,
+                          diagonal_loading: Optional[DiagLoading] = None
+                          ) -> float:
     """
     Compute the loglikelihood.
 
@@ -472,13 +471,13 @@ def find_optimum_log_likelihood_params_complex(
 
 
 # Prediction Function
-def posterior_predictive(
-        X_s: np.ndarray,
-        X_train: np.ndarray,
-        Y_train: np.ndarray,
-        noise_power: float = 1e-8,
-        kernel: KernelFunc = kernel_rbf,
-        theta: Optional[ParamsType] = None) -> Tuple[np.ndarray, np.ndarray]:
+def posterior_predictive(X_s: np.ndarray,
+                         X_train: np.ndarray,
+                         Y_train: np.ndarray,
+                         noise_power: float = 1e-8,
+                         kernel: KernelFunc = kernel_rbf,
+                         theta: Optional[ParamsType] = None
+                         ) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Computes the suffifient statistics of the GP posterior predictive distribution from `m` training data
     `X_train` and `Y_train` and `n` new inputs `X_s`.
