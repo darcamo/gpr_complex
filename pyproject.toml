@@ -1,9 +1,19 @@
 [tool.poetry]
 name = "gpr_complex"
-version = "0.1.0"
+version = "0.2.0post2"
 description = "A GPR library that can work with complex numbers"
 authors = ["Darlan Cavalcante Moreira <darcamo@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/darcamo/gpr_complex"
+keywords = ["GPR", "complex"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers", "Topic :: Scientific/Engineering"
+]
 
 [tool.poetry.dependencies]
 python = "^3.6"
