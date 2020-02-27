@@ -14,7 +14,7 @@ def f(x: np.ndarray, noise_power: float) -> np.ndarray:
 
 class TestGPR(unittest.TestCase):
     def setUp(self) -> None:
-        num_samples = 10
+        num_samples = 50
         noise_power = 1e-2
         self.x = np.random.randn(num_samples,
                                  1) + 1j * np.random.randn(num_samples, 1)
@@ -49,22 +49,36 @@ class TestGPR(unittest.TestCase):
         np.testing.assert_array_almost_equal(self.y, gpr._y_train)
 
         # Add more data without re-training the model
-        num_samples = 5
+        num_samples = 20
         noise_power = 0.01
         x = np.random.randn(num_samples,
                             1) + 1j * np.random.randn(num_samples, 1)
         y = f(x, noise_power)
+
+        # Perform prediction
+        y_pred1 = gpr.predict(x)
+        mse1 = np.mean(np.abs(y_pred1 - y)**2)
+
+        # Add new data to the model
         gpr.add_new_data(x, y)
 
-        # Test that the parameters didn't change
+        # Test that the kernel parameters didn't change with the new data
         params2 = gpr.kernel.get_params()
         np.testing.assert_array_almost_equal(params, params2)
 
         # Test that the new data was added
         assert (gpr._x_train is not None)
         assert (gpr._y_train is not None)
-        self.assertEqual(gpr._x_train.shape[0], 15)
-        self.assertEqual(gpr._y_train.size, 15)
+        self.assertEqual(gpr._x_train.shape[0], 70)
+        self.assertEqual(gpr._y_train.size, 70)
+
+        # Reset the model by fitting it again
+        gpr.fit(self.x, self.y)
+
+        # Now call the predict_and_add_new_data method
+        y_pred2 = gpr.predict_and_add_new_data(x, y)
+        mse2 = np.mean(np.abs(y_pred2 - y)**2)
+        self.assertLess(mse2, mse1)
 
 
 if __name__ == '__main__':

@@ -80,6 +80,20 @@ class GPR:
         """
         return self._likelihood
 
+    def add_new_data(self, x_new: np.ndarray, y_new: np.ndarray) -> None:
+        """
+        Add more data to the model without actually training the model again.
+
+        Parameters
+        ----------
+        x_new : np.ndarray
+            The new input data.
+        y_new : np.ndarray
+            The new target data.
+        """
+        self._x_train = np.concatenate([self._x_train, x_new])
+        self._y_train = np.concatenate([self._y_train, y_new])
+
     def predict(
         self,
         x_test: np.ndarray,
@@ -91,12 +105,15 @@ class GPR:
 
         Parameters
         ----------
-        x_test : np.ndarray The test samples. Dimension: `num_samples` x
-            `num_features`
+        x_test : np.ndarray
+            The test samples. Dimension: `num_samples` x `num_features`
+        return_cov : bool
+            If set to True, the covariance matrix of the predictive posterior is
+            also returned.
 
         Returns
         -------
-        np.ndarray, np.ndarray
+        np.ndarray or (np.ndarray, np.ndarray)
             Posterior mean vector (with `n` samples) and covariance matrix
             (dimension `n x n`).
         """
@@ -110,6 +127,39 @@ class GPR:
         if return_cov:
             return mu, cov
         return mu
+
+    def predict_and_add_new_data(self, x_test: np.ndarray,
+                                 y_test: np.ndarray) -> np.ndarray:
+        """
+        Predict the targets for the provided input `x_test` using the fitted model.
+
+        After predicting the target for each new entry in `x_test` the entry and
+        corresponding true target in `y_test` are added as new data (see
+        `add_new_data` method) without re-training the model. This is suitable
+        when the model is used to perform prediction on a series and after the
+        prediction is performed the true value will be known, which can then be
+        used for future predictions.
+
+        Parameters
+        ----------
+        x_test : np.ndarray
+            The test samples. Dimension: `num_samples` x `num_features`
+        y_test : np.ndarray
+            The variable to be predicted. Dimension: num_samples
+
+        Returns
+        -------
+        np.ndarray
+            The prediction.
+        """
+        assert (y_test.ndim == 1)
+        y_pred = np.empty_like(y_test)
+        for i in range(y_test.size):
+            cur_x = x_test[i:i + 1]
+            y_pred[i] = self.predict(cur_x).item()  # type: ignore
+            # Add the new data
+            self.add_new_data(cur_x, y_test[i:i + 1])
+        return y_pred
 
     def _get_chart_real_case(self, X: np.ndarray) -> GpChart:
         assert (self._x_train is not None)
@@ -129,20 +179,6 @@ class GPR:
             y_units="screen")
         chart.fig.add_layout(text_annotation)
         return chart
-
-    def add_new_data(self, x_new: np.ndarray, y_new: np.ndarray) -> None:
-        """
-        Add more data to the model without actually training the model again.
-
-        Parameters
-        ----------
-        x_new : np.ndarray
-            The new input data.
-        y_new : np.ndarray
-            The new target data.
-        """
-        self._x_train = np.concatenate([self._x_train, x_new])
-        self._y_train = np.concatenate([self._y_train, y_new])
 
     def chart(self, X: np.ndarray, show: bool = True) -> None:
         """
