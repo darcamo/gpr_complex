@@ -31,9 +31,9 @@ class GPR:
         self._noise_power = noise_power
 
         # This will be set by the `fit` method, which wil also update params
-        self._x_train: np.ndarray
-        self._y_train: np.ndarray
-        self._likelihood: float
+        self._x_train: Optional[np.ndarray] = None
+        self._y_train: Optional[np.ndarray] = None
+        self._likelihood: Optional[float] = None
 
     @property
     def kernel(self) -> Kernel:
@@ -71,6 +71,7 @@ class GPR:
         """Property indicating if the model is already trained or not"""
         return self._x_train is not None
 
+    @property
     def likelihood(self) -> Optional[float]:
         """
         Get the likelihood of the trained kernel.
@@ -111,6 +112,9 @@ class GPR:
         return mu
 
     def _get_chart_real_case(self, X: np.ndarray) -> GpChart:
+        assert (self._x_train is not None)
+        assert (self._y_train is not None)
+
         mu, cov = self.predict(X)
         chart = GpChart(dict(mu=mu.ravel(), cov=cov, x=X.ravel()),
                         dict(x=self._x_train.ravel(), y=self._y_train.ravel()),
@@ -125,6 +129,20 @@ class GPR:
             y_units="screen")
         chart.fig.add_layout(text_annotation)
         return chart
+
+    def add_new_data(self, x_new: np.ndarray, y_new: np.ndarray) -> None:
+        """
+        Add more data to the model without actually training the model again.
+
+        Parameters
+        ----------
+        x_new : np.ndarray
+            The new input data.
+        y_new : np.ndarray
+            The new target data.
+        """
+        self._x_train = np.concatenate([self._x_train, x_new])
+        self._y_train = np.concatenate([self._y_train, y_new])
 
     def chart(self, X: np.ndarray, show: bool = True) -> None:
         """

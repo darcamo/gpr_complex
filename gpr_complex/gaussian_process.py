@@ -335,6 +335,7 @@ def compute_loglikelihood_complex(
     float
         The log likelihood.
     """
+    assert (Y_train.ndim == 1)
     if theta is None:
         theta = []
     m = X_train.shape[0]
