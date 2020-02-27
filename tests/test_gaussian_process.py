@@ -200,6 +200,9 @@ class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring
                               +0.5 * m * math.log(2 * np.pi))
         self.assertAlmostEqual(nll, expected_nll)
 
+    def test_posterior_predictive(self) -> None:
+        pass
+
 
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 if __name__ == '__main__':

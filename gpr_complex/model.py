@@ -57,6 +57,17 @@ class GPR:
         self._likelihood = self._kernel.compute_loglikelihood(
             x_train, y_train, self._noise_power)
 
+    def refit(self) -> None:
+        """
+        Refit the model.
+
+        Calling this method only makes sense if you have added new data without
+        fitting the model with the `add_new_data` method.
+        """
+        self._kernel.optimize(self._x_train, self._y_train, self._noise_power)
+        self._likelihood = self._kernel.compute_loglikelihood(
+            self._x_train, self._y_train, self._noise_power)
+
     @property
     def input_dim(self) -> int:
         """
@@ -128,8 +139,10 @@ class GPR:
             return mu, cov
         return mu
 
-    def predict_and_add_new_data(self, x_test: np.ndarray,
-                                 y_test: np.ndarray) -> np.ndarray:
+    def predict_and_add_new_data(self,
+                                 x_test: np.ndarray,
+                                 y_test: np.ndarray,
+                                 refit: bool = False) -> np.ndarray:
         """
         Predict the targets for the provided input `x_test` using the fitted model.
 
@@ -146,6 +159,8 @@ class GPR:
             The test samples. Dimension: `num_samples` x `num_features`
         y_test : np.ndarray
             The variable to be predicted. Dimension: num_samples
+        refit : bool
+            If True, refit the model after each new entry
 
         Returns
         -------
@@ -159,6 +174,9 @@ class GPR:
             y_pred[i] = self.predict(cur_x).item()  # type: ignore
             # Add the new data
             self.add_new_data(cur_x, y_test[i:i + 1])
+            if refit:
+                # Fit the model again with the new data
+                self.refit()
         return y_pred
 
     def _get_chart_real_case(self, X: np.ndarray) -> GpChart:
