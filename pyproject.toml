@@ -14,7 +14,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers", "Topic :: Scientific/Engineering"
 ]
-include = ["LICENSE"]
+include = ["LICENSE", "gpr_complex/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
