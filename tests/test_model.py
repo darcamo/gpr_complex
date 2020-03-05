@@ -27,6 +27,8 @@ class TestGPR(unittest.TestCase):
         # kernel = RBF_ComplexProper(1.0, 1.0)
 
     def test_methods_and_properties(self) -> None:
+        # TODO: test add_new_data and predict_and_add_new_data with discard_oldest_entries True
+
         noise_power = 1e-2
         kernel = RBF_ComplexProper(1.0, 1.0)
         gpr = GPR(noise_power, kernel)

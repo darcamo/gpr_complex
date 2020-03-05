@@ -91,7 +91,10 @@ class GPR:
         """
         return self._likelihood
 
-    def add_new_data(self, x_new: np.ndarray, y_new: np.ndarray) -> None:
+    def add_new_data(self,
+                     x_new: np.ndarray,
+                     y_new: np.ndarray,
+                     discard_oldest_entries: bool = False) -> None:
         """
         Add more data to the model without actually training the model again.
 
@@ -102,8 +105,18 @@ class GPR:
         y_new : np.ndarray
             The new target data.
         """
-        self._x_train = np.concatenate([self._x_train, x_new])
-        self._y_train = np.concatenate([self._y_train, y_new])
+        assert self._x_train is not None
+        assert self._y_train is not None
+
+        if discard_oldest_entries:
+            num_entries = x_new.shape[0]
+            self._x_train = np.concatenate(
+                [self._x_train[num_entries:], x_new])
+            self._y_train = np.concatenate(
+                [self._y_train[num_entries:], y_new])
+        else:
+            self._x_train = np.concatenate([self._x_train, x_new])
+            self._y_train = np.concatenate([self._y_train, y_new])
 
     def predict(
         self,
@@ -142,6 +155,7 @@ class GPR:
     def predict_and_add_new_data(self,
                                  x_test: np.ndarray,
                                  y_test: np.ndarray,
+                                 discard_oldest_entries: bool = False,
                                  refit: bool = False) -> np.ndarray:
         """
         Predict the targets for the provided input `x_test` using the fitted model.
@@ -173,7 +187,7 @@ class GPR:
             cur_x = x_test[i:i + 1]
             y_pred[i] = self.predict(cur_x).item()  # type: ignore
             # Add the new data
-            self.add_new_data(cur_x, y_test[i:i + 1])
+            self.add_new_data(cur_x, y_test[i:i + 1], discard_oldest_entries)
             if refit:
                 # Fit the model again with the new data
                 self.refit()
