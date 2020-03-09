@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gpr_complex"
-version = "0.2.0post2"
+version = "0.3.0"
 description = "A GPR library that can work with complex numbers"
 authors = ["Darlan Cavalcante Moreira <darcamo@gmail.com>"]
 license = "MIT"
@@ -18,9 +18,9 @@ include = ["LICENSE", "gpr_complex/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-numpy = "^1.18.1"
-scipy = "^1.4.1"
-bokeh = "^1.4.0"
+numpy = "*"
+scipy = "*"
+bokeh = "*"
 
 [tool.poetry.dev-dependencies]
 yapf = "^0.29.0"
