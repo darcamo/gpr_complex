@@ -2,9 +2,9 @@ import math
 
 import numpy as np
 from bokeh.plotting import output_file
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF as RBF_sklearn
-from sklearn.gaussian_process.kernels import ConstantKernel, WhiteKernel
+# from sklearn.gaussian_process import GaussianProcessRegressor
+# from sklearn.gaussian_process.kernels import RBF as RBF_sklearn
+# from sklearn.gaussian_process.kernels import ConstantKernel, WhiteKernel
 
 from gpr_complex.kernels import RBF
 from gpr_complex.model import GPR
@@ -27,15 +27,15 @@ gp = GPR(noise_power=noise_power, kernel=kernel)
 gp.fit(x, y)
 
 # Sklearn GPR
-kernel2 = ConstantKernel() * RBF_sklearn() + WhiteKernel()
-gp2 = GaussianProcessRegressor(kernel=kernel2)
-gp2.fit(x, y)
+# kernel2 = ConstantKernel() * RBF_sklearn() + WhiteKernel()
+# gp2 = GaussianProcessRegressor(kernel=kernel2)
+# gp2.fit(x, y)
 
 x_test = np.linspace(-1.5, 1.5, 30)[:, np.newaxis]
 y_test = compute(x_test)
 
 y_pred, cov_pred = gp.predict(x_test, return_cov=True)
-y_pred2, cov_pred2 = gp2.predict(x_test, return_cov=True)
+# y_pred2, cov_pred2 = gp2.predict(x_test, return_cov=True)
 
 # x_test = x_test.flatten()
 # y_pred = y_pred.flatten()
