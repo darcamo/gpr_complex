@@ -1,9 +1,16 @@
-import unittest
-import numpy as np
-from itertools import product
 import math
+import unittest
+from itertools import product
 
-from gpr_complex.gaussian_process import kernel_rbf_complex_proper, kernel_rbf, kernel_rbf_complex, kernel_linear, compute_loglikelihood_naive_complex, compute_loglikelihood_naive, compute_loglikelihood_complex, compute_loglikelihood
+import numpy as np
+
+from gpr_complex.gaussian_process import (compute_loglikelihood,
+                                          compute_loglikelihood_complex,
+                                          compute_loglikelihood_naive,
+                                          compute_loglikelihood_naive_complex,
+                                          kernel_linear, kernel_rbf,
+                                          kernel_rbf_complex,
+                                          kernel_rbf_complex_proper)
 
 
 class TestKernels(unittest.TestCase):  # pylint: disable=missing-class-docstring

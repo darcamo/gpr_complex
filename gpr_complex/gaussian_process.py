@@ -3,11 +3,10 @@ Module with several functions to work with Gaussian processes.
 """
 
 import math
+from typing import Callable, Iterable, List, Optional, Tuple, Union, cast
 
-from typing import Optional, Callable, List, Union, Iterable, Tuple, cast
 import numpy as np
-from scipy.optimize import minimize
-from scipy.optimize import OptimizeResult
+from scipy.optimize import OptimizeResult, minimize
 
 KernelFunc = Callable[..., np.ndarray]
 DiagLoading = Union[float, bool]

@@ -1,14 +1,14 @@
 # pylint: disable=R0914
 """Module with plot related code"""
 
-from typing import List, Optional, Any, cast
+from typing import Any, List, Optional, cast
 
 # np.set_printoptions(linewidth=120, precision=4)
 import numpy as np
+
 from bokeh.models import Band, ColumnDataSource, GlyphRenderer, tools
 from bokeh.palettes import Category10_4 as palette  # pylint: disable=no-name-in-module
 from bokeh.plotting import figure, show
-
 from bokeh.plotting.figure import Figure
 
 

@@ -1,6 +1,8 @@
-import unittest
-import numpy as np
 import math
+import unittest
+
+import numpy as np
+
 from gpr_complex.kernels import RBF_ComplexProper
 from gpr_complex.model import GPR
 
