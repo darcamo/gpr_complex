@@ -30,3 +30,9 @@ repos:
 #   hooks:
 #   - id: python-import-sorter
 #     args: ['--silent-overwrite']
+#
+# Currently darglint is slow and thus this might be commented out in the future
+-   repo: https://github.com/terrencepreilly/darglint
+    rev: master
+    hooks:
+    - id: darglint
