@@ -1,15 +1,16 @@
 # pylint: disable=R0914
 """Module with plot related code"""
 
-from typing import Any, List, Optional, cast
+from typing import Any, List, Optional, Union, cast
 
 # np.set_printoptions(linewidth=120, precision=4)
 import numpy as np
-
 from bokeh.models import Band, ColumnDataSource, GlyphRenderer, tools
 from bokeh.palettes import Category10_4 as palette  # pylint: disable=no-name-in-module
 from bokeh.plotting import figure, show
 from bokeh.plotting.figure import Figure
+
+Source = Union[ColumnDataSource, dict]
 
 
 class GpChart:
@@ -24,7 +25,7 @@ class GpChart:
 
     Parameters
     ----------
-    source : ColumnDataSource, dict
+    source : Source
         Either a bokeh ColumnDataSource of a dictionary containing at least the
         fields 'x', 'mu' and 'cov', where 'x' is a range of values, 'mu' is the
         predicted average function response for the range of values in 'x', and
@@ -47,7 +48,7 @@ class GpChart:
         Ex: width, height, title, etc.
     """
     def __init__(self,
-                 source: ColumnDataSource,
+                 source: Source,
                  train_data_source: Optional[ColumnDataSource] = None,
                  num_samples: int = 0,
                  plot_marker: bool = False,
@@ -150,17 +151,34 @@ class GpChart:
             Passed to bokeh `show` function. Set to True to return a notebook
             handler and allow updating the plot using a ipywidgets, for
             instance.
+
+        Returns
+        -------
+        When `notebook_handle` is True, returns a handle that can be used by
+        `push_notebook`, None otherwise
         """
         return show(self._fig, notebook_handle=notebook_handle)
 
     @property
     def fig(self) -> Figure:
-        """Figure property"""
+        """
+        Figure property
+
+        Returns
+        -------
+        The plot Figure object
+        """
         return self._fig
 
     @property
     def xlabel(self) -> str:
-        """Property to read/set the `x` axis label"""
+        """
+        Property to read/set the `x` axis label
+
+        Returns
+        -------
+        The x-axis label
+        """
         return cast(str, self._fig.xaxis.axis_label)
 
     @xlabel.setter
@@ -169,7 +187,13 @@ class GpChart:
 
     @property
     def ylabel(self) -> str:
-        """Property to read/set the `y` axis label"""
+        """
+        Property to read/set the `y` axis label
+
+        Returns
+        -------
+        The y-axis label
+        """
         return cast(str, self._fig.yaxis.axis_label)
 
     @ylabel.setter
@@ -232,7 +256,7 @@ class GpChart:
 # to plot the prediction have different sizes, we need to create separated
 # column data sources. For the same reason, we have to create two hover tools,
 # one for the prediction data and one for the training data.
-def plot_gp(source: ColumnDataSource,
+def plot_gp(source: Source,
             train_data_source: Optional[ColumnDataSource] = None,
             samples: Optional[np.ndarray] = None,
             plot_marker: bool = False,
@@ -245,7 +269,7 @@ def plot_gp(source: ColumnDataSource,
 
     Parameters
     ----------
-    source : ColumnDataSource, dict
+    source : Source
         Either a bokeh ColumnDataSource of a dictionary containing at least the
         fields 'x', 'mu' and 'cov', where 'x' is a range of values,
         'mu' is the predicted average function response for the range of values
@@ -261,11 +285,12 @@ def plot_gp(source: ColumnDataSource,
     plot_marker : bool
         If predicted points should be marked with a circle or not.
     xlabel : str
-        Label of the 'x' axis. Default is "x"
+        Label of the 'x' axis (default is "x").
     ylabel : str
-        Label of the 'y' axis. Default is "y"
+        Label of the 'y' axis (default is "y").
     dont_show : bool
-        If the plot should not be show and the figure should be returned instead. Default is False.
+        If the plot should not be show and the figure should be returned
+        instead. Default is False.
     kargs : dict
         The remaining arguments captured in `kargs` are passed to bokeh figure.
         Ex: width, height, title, etc.

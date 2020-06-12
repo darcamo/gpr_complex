@@ -24,7 +24,22 @@ class Kernel:
 
     def compute_loglikelihood(self, x_train: np.ndarray, y_train: np.ndarray,
                               noise_power: float) -> float:
-        """Compute the likelihood of the kernel current parameters"""
+        """
+        Compute the likelihood of the kernel current parameters.
+
+        Parameters
+        ----------
+        x_train
+            The training features
+        y_train
+            The training targets
+        noise_power
+            The noise power
+
+        Returns
+        -------
+        The log likelihood.
+        """
         f = compute_loglikelihood_complex if self._work_with_complex_numbers else comp_loglikelihood
         return f(x_train,
                  y_train,
@@ -37,21 +52,54 @@ class Kernel:
         Get the kernel initial parameters.
 
         These are the parameters passed to the kernel during creation.
+
+        Returns
+        -------
+        The kernel initial parameters (before they are optimized with training data)
         """
         return self._initial_params
 
     def get_params(self) -> List[float]:
-        """Get the kernel parameters"""
+        """
+        Get the kernel parameters
+
+        Returns
+        -------
+        The kernel parameters after they are optimized with the training data
+        """
         return self._params
 
     @property
     def work_with_complex_numbers(self) -> bool:
-        """True if this kernel can be used with complex numbers (inputs and target)"""
+        """
+        Property indicating if this kernel can be used with complex numbers (inputs
+        and target) or not.
+
+        Returns
+        -------
+        True if this kernel can be used with complex numbers, False otherwise
+        """
         return self._work_with_complex_numbers
 
     @staticmethod
     def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
-        """Compute the similarity between `X1``and `X2` according with the kernel."""
+        """
+        Compute the similarity between `X1` and `X2` according with the kernel.
+
+        Parameters
+        ----------
+        X1
+            First point
+        X2
+            Second point
+        params
+            Kernel parameters (a variable number of parameters)
+
+        Raises
+        ------
+        NotImplementedError
+            This method must be implemented in a subclass
+        """
         raise NotImplementedError("Implement-me")
 
     def __call__(self, X1: np.ndarray, X2: np.ndarray) -> np.ndarray:
@@ -59,7 +107,18 @@ class Kernel:
 
     def optimize(self, x_train: np.ndarray, y_train: np.ndarray,
                  noise_power: float) -> None:
-        """Optimize the kernel parameters"""
+        """
+        Optimize the kernel parameters
+
+        Parameters
+        ----------
+        x_train
+            The training features
+        y_train
+            The training targets
+        noise_power
+            The noise power
+        """
         f = compute_loglikelihood_complex if self._work_with_complex_numbers else comp_loglikelihood
 
         def function_to_optimize(theta: List[float]) -> float:
@@ -79,7 +138,13 @@ class Kernel:
         self._params = res.x
 
     def clone(self) -> "Kernel":
-        """Create a new kernel with the same parameters of this one"""
+        """
+        Create a new kernel with the same parameters of this one
+
+        Returns
+        -------
+        Another instance of this kernel with the same initial parameters
+        """
         return self.__class__(*self._initial_params)  # type: ignore
 
 
@@ -99,7 +164,22 @@ class RBF(Kernel):
 
     @staticmethod
     def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
-        """Compute the similarity between `X1``and `X2` according with the kernel."""
+        """
+        Compute the similarity between `X1``and `X2` according with the kernel.
+
+        Parameters
+        ----------
+        X1
+            First point
+        X2
+            Second point
+        params
+            Kernel parameters (a variable number of parameters)
+
+        Returns
+        -------
+        Similarity between `X1` and `X2` according with this kernel
+        """
         return kernel_rbf(X1, X2, *params)
 
 
@@ -112,7 +192,22 @@ class RBF_Complex(Kernel):
 
     @staticmethod
     def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
-        """Compute the similarity between `X1``and `X2` according with the kernel."""
+        """
+        Compute the similarity between `X1``and `X2` according with the kernel.
+
+        Parameters
+        ----------
+        X1
+            First point
+        X2
+            Second point
+        params
+            Kernel parameters (a variable number of parameters)
+
+        Returns
+        -------
+        Similarity between `X1` and `X2` according with this kernel
+        """
         return kernel_rbf_complex(X1, X2, *params)
 
 
@@ -125,7 +220,22 @@ class RBF_ComplexProper(Kernel):
 
     @staticmethod
     def compute(X1: np.ndarray, X2: np.ndarray, *params: float) -> np.ndarray:
-        """Compute the similarity between `X1``and `X2` according with the kernel."""
+        """
+        Compute the similarity between `X1``and `X2` according with the kernel.
+
+        Parameters
+        ----------
+        X1
+            First point
+        X2
+            Second point
+        params
+            Kernel parameters (a variable number of parameters)
+
+        Returns
+        -------
+        Similarity between `X1` and `X2` according with this kernel
+        """
         return kernel_rbf_complex_proper(X1, X2, *params)
 
 

@@ -143,6 +143,12 @@ def kernel_linear(X1: np.ndarray,
         Array of n points (n x d).
     bias : float
         The linear kernel bias
+
+    Returns
+    -------
+    np.ndarray
+        A 2D array corresponding to the covariance function.
+        Dimension is (m x n).
     """
     return X1 @ X2.T.conj() + bias
 
@@ -165,7 +171,7 @@ def compute_loglikelihood_naive(X_train: np.ndarray,
         the `m` rows in `X_train`.
     noise_power : float
         The noise power
-    kernel : function
+    kernel : KernelFunc
         A kernel function that accepts `X_train` and `Y_train`. Subsequent
         arguments accepted by the kernel function are the kernel
         hyperparameters and are taken from `*theta`.
@@ -209,7 +215,7 @@ def compute_loglikelihood_naive_complex(
         the `m` rows in `X_train`.
     noise_power : float
         The noise power
-    kernel : function
+    kernel : KernelFunc
         A kernel function that accepts `X_train` and `Y_train`. Subsequent
         arguments accepted by the kernel function are the kernel
         hyperparameters and are taken from `*theta`.
@@ -255,7 +261,7 @@ def compute_loglikelihood(
         the `m` rows in `X_train`.
     noise_power : float
         The noise power
-    kernel : function
+    kernel : KernelFunc
         A kernel function that accepts `X_train` and `Y_train`. Subsequent
         arguments accepted by the kernel function are the kernel
         hyperparameters and are taken from `*theta`.
@@ -314,7 +320,7 @@ def compute_loglikelihood_complex(
         the `m` rows in `X_train`.
     noise_power : float
         The noise power
-    kernel : function
+    kernel : KernelFunc
         A kernel function that accepts `X_train` and `Y_train`. Subsequent
         arguments accepted by the kernel function are the kernel
         hyperparameters and are taken from `*theta`.
@@ -373,18 +379,18 @@ def find_optimum_log_likelihood_params_real(
         the `m` rows in `X_train`.
     noise_power : float
         The noise power
-    kernel : function
+    kernel : KernelFunc
         A kernel function that accepts `X_train` and `Y_train`. Subsequent
         arguments accepted by the kernel function are the kernel
         hyperparameters and are taken from `*theta`.
-    initial_theta : List
+    initial_theta : ParamsType
         The initial theta values.
     minimizeargs : iterable
         Extra arguments that are passed to `scipy.optimize.minimize` (See `scipy.optimize.minimize` help)
 
     Returns
     -------
-    res : OptimizeResult
+    OptimizeResult
         The result of the minimization. See `scipy.optimize.minimize`.
         Particularly, the optimum values are returned by `res.x`
     """
@@ -412,18 +418,18 @@ def find_optimum_log_likelihood_params_complex(
         the `m` rows in `X_train`.
     noise_power : float
         The noise power
-    kernel : function
+    kernel : KernelFunc
         A kernel function that accepts `X_train` and `Y_train`. Subsequent
         arguments accepted by the kernel function are the kernel
         hyperparameters and are taken from `*theta`.
-    initial_theta : List
+    initial_theta : ParamsType
         The initial theta values.
     minimizeargs : iterable
         Extra arguments that are passed to `scipy.optimize.minimize` (See `scipy.optimize.minimize` help)
 
     Returns
     -------
-    res : OptimizeResult
+    OptimizeResult
         The result of the minimization. See `scipy.optimize.minimize`.
         Particularly, the optimum values are returned by `res.x`
     """

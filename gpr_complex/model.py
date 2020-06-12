@@ -37,7 +37,13 @@ class GPR:
 
     @property
     def kernel(self) -> Kernel:
-        """Return the kernel used by this GPR model."""
+        """
+        Property to get the kernel used by this GPR model.
+
+        Returns
+        -------
+        The kernel used by this GPR model
+        """
         return self._kernel
 
     def fit(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
@@ -71,7 +77,11 @@ class GPR:
     @property
     def input_dim(self) -> int:
         """
-        Number of dimensions features in the training sample
+        Property to get the number of dimensions of the features in the training sample
+
+        Returns
+        -------
+        The number of dimensions of the features in the training sample
         """
         if self._x_train is None:
             return 0
@@ -79,7 +89,13 @@ class GPR:
 
     @property
     def is_trained(self) -> bool:
-        """Property indicating if the model is already trained or not"""
+        """
+        Property indicating if the model is already trained or not
+
+        Returns
+        -------
+        True if the model is already trained, False otherwise
+        """
         return self._x_train is not None
 
     @property
@@ -87,7 +103,9 @@ class GPR:
         """
         Get the likelihood of the trained kernel.
 
-        It returns None if the model was not trained yet.
+        Returns
+        -------
+        None if the model was not trained yet, otherwise returns the likelihood of the trained model.
         """
         return self._likelihood
 
@@ -104,6 +122,8 @@ class GPR:
             The new input data.
         y_new : np.ndarray
             The new target data.
+        discard_oldest_entries : bool
+            If old entries should be discarded or not.
         """
         assert self._x_train is not None
         assert self._y_train is not None
@@ -140,6 +160,11 @@ class GPR:
         np.ndarray or (np.ndarray, np.ndarray)
             Posterior mean vector (with `n` samples) and covariance matrix
             (dimension `n x n`).
+
+        Raises
+        ------
+        RuntimeError
+            If the model is not trained yet
         """
         if not self.is_trained:
             raise RuntimeError(
@@ -173,6 +198,8 @@ class GPR:
             The test samples. Dimension: `num_samples` x `num_features`
         y_test : np.ndarray
             The variable to be predicted. Dimension: num_samples
+        discard_oldest_entries : bool
+            If old entries should be discarded or not
         refit : bool
             If True, refit the model after each new entry
 
@@ -222,7 +249,7 @@ class GPR:
         ----------
         X : np.ndarray
             The array to with the inputs to prediction the output
-        show : bool, optional
+        show : bool
             If the plot should be shown. Default is True.
 
         Raises
